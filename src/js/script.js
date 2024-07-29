@@ -1,3 +1,5 @@
+let BASE_URL = "https://join-19628-default-rtdb.firebaseio.com/contacts";
+
 async function includeHTML() {
   let includeElements = document.querySelectorAll('[w3-include-html]');
   for (let element of includeElements) {
@@ -9,8 +11,10 @@ async function includeHTML() {
       let resp = await fetch(sanitizedUrl);
       if (resp.ok) {
         element.innerHTML = await resp.text();
-        if (file.includes('addTask.html') || file.includes('contacts.html'))  {
-          init();
+        if (file.includes('addTask.html'))  {
+          initTask();
+        } else if (file.includes('contacts.html'))  {
+          initContact();
         }
       } else {
         element.innerHTML = 'Page not found';

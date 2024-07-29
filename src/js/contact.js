@@ -1,5 +1,3 @@
-let BASE_URL = "https://join-19628-default-rtdb.firebaseio.com/contacts";
-
 let allContacts = {
   names: [],
   mails: [],
@@ -7,7 +5,7 @@ let allContacts = {
   images: [],
 };
 
-async function init() {
+async function initContact() {
   try {
     await getData("/");
     sortContacts();

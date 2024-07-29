@@ -1,11 +1,11 @@
-let BASE_URL = "https://join-19628-default-rtdb.firebaseio.com";
 let subtasksArray = [];
 let prioArray = [];
 let addTaskArray = [];
 let expanded = false;
 let assignedToUserArray = [];
 let isValid = true;
-async function init() {
+
+async function initTask() {
     try {
         let fireBaseData = await onloadData("/");
         let contacts = await fetchContacts(fireBaseData);
