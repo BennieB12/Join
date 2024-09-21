@@ -65,15 +65,23 @@ function onDrop(event) {
  * @param {string} category - The new category to move the task to.
  * @async
  */
+/**
+ * Moves the dragged task to a new category and updates it in Firebase.
+ *
+ * @param {string} category - The new category to move the task to.
+ * @async
+ */
 async function moveTo(category) {
   if (currentDraggedElement) {
+    const oldCategory = task[currentDraggedElement]["boardCategory"];
+    
     task[currentDraggedElement]["boardCategory"] = category;
-
-    await updateTaskInFirebase({
+    await addTaskToFirebase({
       id: currentDraggedElement,
       boardCategory: category,
     });
 
+    await deleteTaskFromFirebase(currentDraggedElement);
     await updateHTML();
   } else {
     console.error("No task is being dragged.");
@@ -82,23 +90,28 @@ async function moveTo(category) {
   updateStatusMessages();
 }
 
-/**
- * Updates the task's category in Firebase.
- *
- * @param {Object} task - The task object containing the ID and new category.
- * @param {string} task.id - The unique key of the task being updated.
- * @param {string} task.boardCategory - The new board category of the task.
- * @async
- */
-async function updateTaskInFirebase(task) {
+
+async function addTaskToFirebase(task) {
   try {
-    await fetch(`${BASE_URL}/tasks/${task.id}/0.json`, {
-      method: "PATCH",
-      body: JSON.stringify({ boardCategory: task.boardCategory }),
+    const response = await fetch(`${BASE_URL}/tasks.json`, {
+      method: "POST",
+      body: JSON.stringify(task),
       headers: { "Content-Type": "application/json" },
     });
+    const data = await response.json();
+    task.id = data.name;
   } catch (error) {
-    console.error("Error updating task in Firebase:", error);
+    console.error("Error adding task to Firebase:", error);
+  }
+}
+
+async function deleteTaskFromFirebase(taskId) {
+  try {
+    await fetch(`${BASE_URL}/tasks/${taskId}/0.json`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    console.error("Error deleting task from Firebase:", error);
   }
 }
 
