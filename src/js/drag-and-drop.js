@@ -5,21 +5,10 @@ document.addEventListener("dragend", handleRotateEnd);
 
 let cachedElement = null;
 
-/**
- * Starts the dragging process by setting the current dragged task's key.
- *
- * @param {string} taskkey - The unique key of the task being dragged.
- */
 function startDragging(taskkey) {
   currentDraggedElement = taskkey;
- // console.log("Dragging element with taskkey:", currentDraggedElement);
 }
 
-/**
- * Adds the "rotate" class to the closest ".board-task-container" element when dragging starts.
- * 
- * @param {Event} event - The event object from the event listener.
- */
 function handleRotateStart(event) {
   cachedElement = event.target.closest(".board-task-container");
   if (cachedElement) {
@@ -27,11 +16,6 @@ function handleRotateStart(event) {
   }
 }
 
-/**
- * Removes the "rotate" class from the previously cached ".board-task-container" element.
- * 
- * @param {Event} event - The event object from the event listener.
- */
 function handleRotateEnd(event) {
   if (cachedElement) {
     cachedElement.classList.remove("rotate");
@@ -39,24 +23,25 @@ function handleRotateEnd(event) {
   }
 }
 
-/**
- * Allows the dragged item to be dropped on a valid target by preventing the default behavior.
- *
- * @param {DragEvent} ev - The drag event.
- */
+async function drop(ev) {
+  ev.preventDefault();
+  let data = ev.dataTransfer.getData("text");
+  let currentTargetId = ev.currentTarget.id;
+
+  task = { id: data, boardCategory: currentTargetId };
+  await updateTaskInFirebase(task);
+
+  document.getElementById(data).parentElement.removeChild(document.getElementById(data));
+  document.getElementById(currentTargetId).appendChild(document.getElementById(data));
+}
+
+
 function allowDrop(ev) {
   ev.preventDefault();
 }
 
-/**
- * Handles the drop event by retrieving the target category and initiating the move.
- *
- * @param {DragEvent} event - The drop event.
- */
-function onDrop(event) {
-  event.preventDefault();
-  const newCategory = event.target.dataset.category;
-  moveTo(newCategory);
+function onDragOver(ev) {
+  allowDrop(ev);
 }
 
 /**
@@ -76,12 +61,11 @@ async function moveTo(category) {
     const oldCategory = task[currentDraggedElement]["boardCategory"];
     
     task[currentDraggedElement]["boardCategory"] = category;
-    await addTaskToFirebase({
+    await updateTaskInFirebase({
       id: currentDraggedElement,
       boardCategory: category,
     });
 
-    await deleteTaskFromFirebase(currentDraggedElement);
     await updateHTML();
   } else {
     console.error("No task is being dragged.");
@@ -91,27 +75,24 @@ async function moveTo(category) {
 }
 
 
-async function addTaskToFirebase(task) {
+/**
+ * Updates the task's category in Firebase using PUT.
+ *
+ * @param {Object} task - The task object containing the ID and new category.
+ * @param {string} task.id - The unique key of the task being updated.
+ * @param {string} task.boardCategory - The new board category of the task.
+ * @async
+ */
+async function updateTaskInFirebase(task) {
   try {
-    const response = await fetch(`${BASE_URL}/tasks.json`, {
-      method: "POST",
-      body: JSON.stringify(task),
+   
+    await fetch(`${BASE_URL}/tasks/${task.id}.json`, {
+      method: "PUT",
+      body: JSON.stringify({ boardCategory: task.boardCategory }),
       headers: { "Content-Type": "application/json" },
     });
-    const data = await response.json();
-    task.id = data.name;
   } catch (error) {
-    console.error("Error adding task to Firebase:", error);
-  }
-}
-
-async function deleteTaskFromFirebase(taskId) {
-  try {
-    await fetch(`${BASE_URL}/tasks/${taskId}/0.json`, {
-      method: "DELETE",
-    });
-  } catch (error) {
-    console.error("Error deleting task from Firebase:", error);
+    console.error("Error updating task in Firebase:", error);
   }
 }
 
