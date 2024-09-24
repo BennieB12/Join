@@ -260,6 +260,7 @@ function addSubtaskEdit(index) {
     subtasksStatusArrayEdit.push(false);
     resetSubtaskInputEdit(index);
     subtasksRenderEdit(index);
+    progressBar(index);
   }
 }
 
@@ -366,8 +367,10 @@ function pushTaskObjectsToArrayEdit(taskTitle, taskDescription, dueDateTask, tas
 function deleteSubtaskEdit(i, indexHTML) {
   let position = document.getElementById(`supplementarySubtaskEdit${i}`);
   position.innerHTML = "";
-  subtasksArrayEdit.splice([i], 1);
+  subtasksArrayEdit.splice(i, 1);
+  subtasksStatusArrayEdit.splice(i, 1); 
   subtasksRenderEdit(indexHTML);
+  progressBar(indexHTML);
 }
 
 /**
