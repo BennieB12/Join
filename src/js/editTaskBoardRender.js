@@ -27,25 +27,42 @@ function showSubtaskControlsEdit(index, subtasks) {
                             </button>`;
 }
 
-/**
- * Enables editing mode for a specific subtask by updating its HTML content.
- * 
- * @param {number} index - The index of the subtask to edit.
- */
 function editSubtaskEdit(i, indexHTML, subtask, subtasksEditArrayOrigin) {
     let position = document.getElementById(`supplementarySubtaskEdit${i}`);
     position.classList.remove('subtasks-edit');
     position.classList.add('subtasks-edit-input');
-    let arrayForSubtasks = subtask.split(',')
-    .map(subtask => subtask.trim())
-    .filter(subtask => subtask !== 'undefined' && subtask !== "");
-  console.log(arrayForSubtasks);
+
+    let arrayForSubtasks = subtasksEditArrayOrigin.split(',')
+        .map(subtask => subtask.trim())
+        .filter(subtask => subtask !== 'undefined' && subtask !== "");
+
+    // Umwandlung von i in eine Zahl
+    i = parseInt(i, 10);
+
+    // Debugging-Informationen
+    console.log("Aktueller Wert von i:", i);
+    console.log("Array für Subtasks:", arrayForSubtasks);
+    console.log("Länge des Arrays für Subtasks:", arrayForSubtasks.length);
+
+    // Überprüfen, ob das Array mindestens einen Index hat
+    if (arrayForSubtasks.length === 0) {
+        console.error("Das Array für Subtasks ist leer.");
+        return; // Beende die Funktion, wenn das Array leer ist
+    }
+
+    // Sicherstellen, dass i innerhalb der Grenzen liegt
+    if (i < 0 || i >= arrayForSubtasks.length) {
+        console.error(`Index ${i} ist außerhalb der Grenzen des Arrays.`);
+        return; // Beende die Funktion, wenn der Index ungültig ist
+    }
+
     let arrayPosition = arrayForSubtasks[i];
-    console.log(arrayPosition)
-  
+    console.log("Array-Position:", arrayPosition);
+
+    // Hier wird der HTML-Inhalt aktualisiert
     position.innerHTML = editSubtaskHTMLEdit(i, indexHTML, subtask, subtasksEditArrayOrigin, arrayPosition);
-  }
-  
+}
+
 /**
  * Renders an editable input field for a subtask with options to delete or finish editing.
  *
