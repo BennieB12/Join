@@ -351,15 +351,21 @@ function pushTaskObjectsToArray(taskTitle, taskDescription, dueDateTask, taskCat
  * @param {string} [path="/tasks"] - The path where the data will be saved in Firebase.
  * @returns {Promise<void>}
  */
-async function saveToFirebase(path = "/tasks") {
-  let response = await fetch(BASE_URL + path + ".json", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(addTaskArray),
-  });
+async function saveToFirebase() {
+  for (const task of addTaskArray) {
+    let response = await fetch(BASE_URL + "/tasks.json", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(task),
+    });
+    if (!response.ok) {
+      console.error("Failed to save task:", task);
+    }
+  }
 }
+
 
 /**
  * Handles the selection of a priority level and updates the button styles.

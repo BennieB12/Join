@@ -95,23 +95,30 @@ async function fetchUserNamesBoardNew(path = "") {
     }
   }
 
-async function generateHTMLObjectsBoard(taskkeys, task) {
-  for (let index = 0; index < taskkeys.length; index++) {
-    const { category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks , subtaskStatus} = task[taskkeys[index]][0];
-    taskArrayBoard.push({
-      title: title,
-      description: description,
-      dueDate:dueDate,
-      category:category,
-      prio:prio,
-      boardCategory:boardCategory,
-      assignedTo: assignedTo,
-      subtasks: subtasks,
-      subtaskStatus: subtaskStatus
-    })
+  async function generateHTMLObjectsBoard(taskkeys, task) {
+    for (let index = 0; index < taskkeys.length; index++) {
+      const taskItem = task[taskkeys[index]];  // Direkt auf die Task-ID zugreifen
+      
+      if (taskItem) {  // Sicherstellen, dass taskItem existiert
+        const { category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus } = taskItem;
+        taskArrayBoard.push({
+          title: title,
+          description: description,
+          dueDate: dueDate,
+          category: category,
+          prio: prio,
+          boardCategory: boardCategory,
+          assignedTo: assignedTo,
+          subtasks: subtasks,
+          subtaskStatus: subtaskStatus
+        });
+      } else {
+        console.warn(`Task with key ${taskkeys[index]} is undefined or empty`);
+      }
+    }
+    upstreamHTMLrender();
   }
-  upstreamHTMLrender();
-}
+  
 
 /**
  * Generates HTML objects for the task board based on provided task keys and task data.
