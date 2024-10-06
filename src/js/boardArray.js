@@ -18,35 +18,65 @@ let subtasksEditArrayDelete = [];
 let showSubtaskConrolFalse = false;
 let subtasksControlGlobal = [];
 
-
-async function initDataBoard(){
+async function initDataBoard() {
   taskArrayBoard = [];
-    try {
-        taskkeysGlobal.length = 0;
-        task = await onloadDataBoard("/tasks");
-        let fetchImageUrls = await fetchImagesUrlsBoardNew("/");
-        let fetchUserNames = await fetchUserNamesBoardNew("/");
-        for (let index = 0; index < fetchImageUrls.length; index++) {
-            const elementUrl = fetchImageUrls[index];
-            const elementNames = fetchUserNames[index].name;
-            imageUrlBoard.push(elementUrl)
-            userNamesBoard.push(elementNames)  
-        }
-        if (!task || typeof task !== "object") {
-          console.warn("No valid task data available.");
-          return;
-        }
-        taskkeys = Object.keys(task);
-        if (taskkeys.length === 0) {
-          console.warn("No tasks found.");
-          return;
-        }
-        taskkeysGlobal.push(taskkeys);
-        await generateHTMLObjectsBoard(taskkeys, task);
-} catch (error) {
+  try {
+    taskkeysGlobal.length = 0;
+
+    // Lade die Daten
+    task = await onloadDataBoard("/tasks");
+
+    // Debug: Zeige die geladenen Task-Daten an
+    console.log("Loaded task data:", task);
+
+    // Falls keine Daten vorhanden sind oder das Format falsch ist
+    if (!task || typeof task !== "object") {
+      console.warn("No valid task data available.");
+      return;
+    }
+
+    // Prüfen, ob die Daten ein Objekt sind und die Schlüssel korrekt extrahiert werden
+    taskkeys = Object.keys(task);
+
+    if (taskkeys.length === 0) {
+      console.warn("No tasks found.");
+      return;
+    }
+
+    // Debug: Zeige die extrahierten Schlüssel (IDs)
+    console.log("Extracted task keys (IDs):", taskkeys);
+
+    // Vermeide das Laden aus einem Array-Index wie 0; Arbeite mit den Schlüsseln
+    taskkeysGlobal.push(...taskkeys); // Spread-Operator verwenden, um sicherzustellen, dass Strings gespeichert werden
+
+    // Überprüfe und verarbeite die Task-IDs
+    for (let id of taskkeys) {
+      // Debug: Zeige die aktuelle ID an
+      console.log("Processing task ID:", id);
+
+      // Hier überprüfst du, ob die ID ein String ist, und konvertierst sie bei Bedarf
+      if (typeof id !== "string") {
+        console.warn(`Task ID ${id} is not a string, converting to string.`);
+        id = String(id); // Konvertiere ID in einen String, falls es keiner ist
+      }
+
+      const taskData = task[id];
+
+      // Prüfe, ob die Aufgabe existiert
+      if (!taskData || Object.keys(taskData).length === 0) {
+        console.warn(`Task with key ${id} is undefined or empty`);
+        continue;
+      }
+
+      // Verarbeite die Daten weiter
+      await generateHTMLObjectsBoard(id, taskData);
+    }
+
+  } catch (error) {
     console.error("Error loading tasks:", error);
   }
 }
+
 
 /**
  * Loads data from the specified path and returns the parsed JSON response.
@@ -95,31 +125,40 @@ async function fetchUserNamesBoardNew(path = "") {
     }
   }
 
-  async function generateHTMLObjectsBoard(taskkeys, task) {
-    for (let index = 0; index < taskkeys.length; index++) {
-      const taskItem = task[taskkeys[index]];  // Direkt auf die Task-ID zugreifen
-      
-      if (taskItem) {  // Sicherstellen, dass taskItem existiert
-        const { category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus } = taskItem;
-        taskArrayBoard.push({
-          title: title,
-          description: description,
-          dueDate: dueDate,
-          category: category,
-          prio: prio,
-          boardCategory: boardCategory,
-          assignedTo: assignedTo,
-          subtasks: subtasks,
-          subtaskStatus: subtaskStatus
-        });
-      } else {
-        console.warn(`Task with key ${taskkeys[index]} is undefined or empty`);
-      }
-    }
-    upstreamHTMLrender();
-  }
-  
+  async function generateHTMLObjectsBoard(taskkeys, taskData) {
+    console.log("Task keys:", taskkeys);
+    console.log("Task object:", taskData);
 
+    
+    for (let index = 0; index < taskkeys.length; index++) {
+        const taskKey = taskkeys[index];
+        const taskItem = taskData[index];  // Zugriff auf das entsprechende Element des Arrays
+
+        console.log(`Processing task key: ${taskKey}`);
+
+        if (taskItem) {
+            const { category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus } = taskItem;
+
+            taskArrayBoard.push({
+                title: title || 'No title',
+                description: description || 'No description',
+                dueDate: dueDate || 'No due date',
+                category: category || 'No category',
+                prio: prio || 'No priority',
+                boardCategory: boardCategory || 'No board category',
+                assignedTo: assignedTo || 'Unassigned',
+                subtasks: subtasks || [],
+                subtaskStatus: subtaskStatus || []
+            });
+        } else {
+            console.warn(`Task with key ${taskKey} is undefined or empty`);
+        }
+    }
+
+    await upstreamHTMLrender();
+}
+
+  
 /**
  * Generates HTML objects for the task board based on provided task keys and task data.
  * 
