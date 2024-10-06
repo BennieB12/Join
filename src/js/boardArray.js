@@ -11,7 +11,7 @@ let subtasksEditArrayOrigin = [];
 let assignedToUserArrayOpen = [];
 let subtaskStatusArray = [];
 let assignedToEditName = []
-let asiignedToEditUrl = [];
+let assignedToEditUrl = [];
 let showSubtasksEdit = [];
 let subtasksStatusArrayEdit = [];
 let subtasksEditArrayDelete = [];
@@ -19,31 +19,42 @@ let showSubtaskConrolFalse = false;
 let subtasksControlGlobal = [];
 
 
-async function initDataBoard(){
+async function initDataBoard() {
   taskArrayBoard = [];
-    try {
-        taskkeysGlobal.length = 0;
-        task = await onloadDataBoard("/tasks");
-        let fetchImageUrls = await fetchImagesUrlsBoardNew("/");
-        let fetchUserNames = await fetchUserNamesBoardNew("/");
-        for (let index = 0; index < fetchImageUrls.length; index++) {
-            const elementUrl = fetchImageUrls[index];
-            const elementNames = fetchUserNames[index].name;
-            imageUrlBoard.push(elementUrl)
-            userNamesBoard.push(elementNames)  
-        }
-        if (!task || typeof task !== "object") {
-          console.warn("No valid task data available.");
-          return;
-        }
-        taskkeys = Object.keys(task);
-        if (taskkeys.length === 0) {
-          console.warn("No tasks found.");
-          return;
-        }
-        taskkeysGlobal.push(taskkeys);
-        await generateHTMLObjectsBoard(taskkeys, task);
-} catch (error) {
+  taskkeysGlobal.length = 0;
+  try {
+    const [task, fetchImageUrls, fetchUserNames] = await Promise.all([
+      onloadDataBoard("/tasks"),
+      fetchImagesUrlsBoardNew("/"),
+      fetchUserNamesBoardNew("/")
+    ]);
+    if (!task || typeof task !== "object") {
+      console.warn("No valid task data available.");
+      return;
+    }
+    if (!Array.isArray(fetchImageUrls) || !Array.isArray(fetchUserNames)) {
+      console.warn("No valid user data available.");
+      return;
+    }
+    if (fetchImageUrls.length !== fetchUserNames.length) {
+      console.warn("Mismatch in number of images and user names.");
+      return;
+    }
+    fetchImageUrls.forEach((elementUrl, index) => {
+      const elementNames = fetchUserNames[index]?.name;
+      imageUrlBoard.push(elementUrl);
+      if (elementNames) {
+        userNamesBoard.push(elementNames);
+      }
+    });
+    taskkeys = Object.keys(task);
+    if (taskkeys.length === 0) {
+      console.warn("No tasks found.");
+      return;
+    }
+    taskkeysGlobal.push(...taskkeys);
+    await generateHTMLObjectsBoard(taskkeys, task);
+  } catch (error) {
     console.error("Error loading tasks:", error);
   }
 }
@@ -81,34 +92,48 @@ async function fetchImagesUrlsBoardNew(path = "") {
  * @returns {Promise<Object[]>} - A promise that resolves to an array of objects containing user names.
  */
 async function fetchUserNamesBoardNew(path = "") {
-  let response = await fetch(BASE_URL + path + ".json");
-  let responseToJson = await response.json();
-  let contacts = responseToJson.contacts;
   try {
-      const extractNamesBoard = (contacts) => {
-        return Object.values(contacts).map((entry) => ({ name: entry.name }));
-      };
-      const names = extractNamesBoard(contacts);
-      return names;
-    } catch (error) {
-      console.error(error);
+    let response = await fetch(BASE_URL + path + ".json");
+    if (!response.ok) {
+      throw new Error(`Netzwerkfehler: ${response.status} ${response.statusText}`);
     }
+    let responseToJson = await response.json();
+    let contacts = responseToJson.contacts;
+    if (!contacts || typeof contacts !== 'object') {
+      console.warn("Keine gültigen Kontakte gefunden");
+      return [];
+    }
+    const extractNamesBoard = (contacts) => {
+      return Object.values(contacts).map((entry) => ({ name: entry.name }));
+    };
+    const names = extractNamesBoard(contacts);
+    return names;
+  } catch (error) {
+    console.error("Fehler beim Abrufen der Benutzernamen:", error);
+    return [];
   }
+}
 
+ /**
+ * Generates HTML objects for the task board based on provided task keys and task data.
+ * 
+ * @param {Array<string>} taskkeys - An array of keys representing tasks.
+ * @param {Object} task - An object containing task details for each key.
+ */
 async function generateHTMLObjectsBoard(taskkeys, task) {
+  if (!Array.isArray(taskArrayBoard)) {
+    console.error("taskArrayBoard ist nicht definiert oder kein Array.");
+    return;
+  }
   for (let index = 0; index < taskkeys.length; index++) {
-    const { category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks , subtaskStatus} = task[taskkeys[index]][0];
-    taskArrayBoard.push({
-      title: title,
-      description: description,
-      dueDate:dueDate,
-      category:category,
-      prio:prio,
-      boardCategory:boardCategory,
-      assignedTo: assignedTo,
-      subtasks: subtasks,
-      subtaskStatus: subtaskStatus
-    })
+    const taskData = task[taskkeys[index]];
+    if (!Array.isArray(taskData) || taskData.length === 0) {
+      console.warn(`Keine gültigen Daten für Task mit Schlüssel ${taskkeys[index]}`);
+      continue;
+    }
+    const taskItem = taskData[0];
+    const { category, description, dueDate, prio, title, boardCategory, assignedTo = [], subtasks = [], subtaskStatus = [] } = taskItem;
+    taskArrayBoard.push({title, description, dueDate, category, prio, boardCategory, assignedTo, subtasks, subtaskStatus});
   }
   upstreamHTMLrender();
 }
@@ -119,25 +144,31 @@ async function generateHTMLObjectsBoard(taskkeys, task) {
  * @param {Array<string>} taskkeys - An array of keys representing tasks.
  * @param {Object} task - An object containing task details for each key.
  */
-function upstreamHTMLrender(){
-  let position = document.getElementById('todo') ||
-              document.getElementById('progress') ||
-              document.getElementById('feedback') ||
-              document.getElementById('done');
-
-if (position) {
+function upstreamHTMLrender() {
+  let position = document.getElementById('todo') || 
+                 document.getElementById('progress') || 
+                 document.getElementById('feedback') || 
+                 document.getElementById('done');
+  if (!position) {
+    console.error("Kein gültiges Positionselement gefunden.");
+    return;
+  }
   position.innerHTML = '';
+  if (!Array.isArray(taskArrayBoard) || taskArrayBoard.length === 0) {
+    console.warn("taskArrayBoard ist leer oder nicht definiert.");
+    return;
+  }
+  for (let index = 0; index < taskArrayBoard.length; index++) {
+    const element = taskArrayBoard[index];
+    const { category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus } = element;
+    positionOfHTMLBlockBoard(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus);
+    searchIndexUrlBoard(index, assignedTo);
+    searchprioBoard(index, prio);
+    subtasksRenderBoard(index, subtasks);
+    CategoryColor(index, category);
+    progressBar(index, subtasks, subtaskStatus);
+  }
 }
-    for (let index = 0; index < taskArrayBoard.length; index++) {
-      const element = taskArrayBoard[index];
-      const { category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks , subtaskStatus} = element;
-      positionOfHTMLBlockBoard(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks , subtaskStatus)
-      searchIndexUrlBoard(index, assignedTo);
-      searchprioBoard(index, prio);
-      subtasksRenderBoard(index, subtasks);
-      CategoryColor(index, category);
-      progressBar(index, subtasks, subtaskStatus);
-    }}
 
 /**
  * Updates the priority display for a specific task on the board based on the given priority level.
@@ -176,55 +207,71 @@ function searchprioBoard(index, prio) {
  * @param {string} subtaskStatus - The status of the subtasks.
  */
 function positionOfHTMLBlockBoard(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus) {
-  let position = document.getElementById(`${boardCategory}`);
-  position.innerHTML += `
-    <div id="parentContainer${index}" draggable="true" ondragstart="startDragging('${taskkeys[index]}')" onclick="openTaskToBoardRender('${index}', '${category}', '${description}', '${dueDate}', '${prio}', '${title}', '${boardCategory}', '${assignedTo}', '${subtasks}', '${subtaskStatus}')" class="board-task-container pointer bradius24 d-flex flex-d-col content-even mg-btt25"> 
-      <div class="d-flex-between" style="position: relative;">
-        <h1 id="categoryColor${index}" class="txt-center fs-16 mg-block-none bradius8 color-wh">${category}</h1>
-        <img src="/public/img/dots.png" id="dots-parent-container${index}" onclick="toggleElementDropDown(event, '#taskDropdown${index}', 'd-none')">
-        <div id="taskDropdown${index}" class="task-dropdown d-flex-start flex-d-col p-10 d-none">
-          <span>Move to:</span>
-          <a href="#" onclick="moveTaskToCategory('${taskkeys[index]}', 'todo')">ToDo</a>
-          <a href="#" onclick="moveTaskToCategory('${taskkeys[index]}', 'progress')">Progress</a>
-          <a href="#" onclick="moveTaskToCategory('${taskkeys[index]}', 'feedback')">Feedback</a>
-          <a href="#" onclick="moveTaskToCategory('${taskkeys[index]}', 'done')">Done</a>
-        </div>
-        <img onclick="closeOpenTask(${index})" id="closeOpenTask${index}" class="d-none" src="../public/img/Close.png">
+  let position = document.getElementById(boardCategory);
+  let taskContainer = document.createElement('div');
+  taskContainer.id = `parentContainer${index}`;
+  taskContainer.draggable = true;
+  taskContainer.className = "board-task-container pointer bradius24 d-flex flex-d-col content-even mg-btt25";
+  taskContainer.addEventListener('dragstart', () => startDragging(taskkeys[index]));
+  taskContainer.addEventListener('click', () => openTaskToBoardRender(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus));
+  taskContainer.innerHTML = `
+    <div class="d-flex-between" style="position: relative;">
+      <h1 id="categoryColor${index}" class="txt-center fs-16 mg-block-none bradius8 color-wh">${category}</h1>
+      <img src="/public/img/dots.png" id="dots-parent-container${index}" alt="Options" />
+      <div id="taskDropdown${index}" class="task-dropdown d-flex-start flex-d-col p-10 d-none">
+        <span>Move to:</span>
+        <a href="#" onclick="moveTaskToCategory('${taskkeys[index]}', 'todo')">ToDo</a>
+        <a href="#" onclick="moveTaskToCategory('${taskkeys[index]}', 'progress')">Progress</a>
+        <a href="#" onclick="moveTaskToCategory('${taskkeys[index]}', 'feedback')">Feedback</a>
+        <a href="#" onclick="moveTaskToCategory('${taskkeys[index]}', 'done')">Done</a>
       </div>
-      <div class="width220 mg-top-4">
-        <h2 class="mg-block-none fs-16 fw-700">${title}</h2> 
+      <img onclick="closeOpenTask(${index})" id="closeOpenTask${index}" class="d-none" src="../public/img/Close.png" alt="Close task" />
+    </div>
+    <div class="width220 mg-top-4">
+      <h2 class="mg-block-none fs-16 fw-700">${title}</h2>
+    </div>
+    <div class="mg-bot-4 mg-top-4">
+      <p class="mg-block-none fs-16 fw-400 color-gr width220" id="limitTextDesciption${index}">${description}</p>
+    </div>
+    <div class="progress-container d-flex-between width220">
+      <div id="hideProgressBar${index}" class="width128">
+        <div id="progressBar${index}" class="progress-bar pointer"></div>
       </div>
-      <div class="mg-bot-4 mg-top-4">  
-        <p class="mg-block-none fs-16 fw-400 color-gr width220" id="limitTextDesciption${index}">${description}</p>
-      </div> 
-      <div class="progress-container d-flex-between width220">
-        <div id="hideProgressBar${index}" class="width128">
-          <div id="progressBar${index}" class="progress-bar pointer"></div>
-        </div>
-        <div id="hideProgressAmount${index}" class="d-flex">
-          <div id="subtasksAmountTrue${index}" class="d-flex-center fs-12 fw-400 color-bl"></div>
-          <div id="subtasks${index}" class="subtasksLength fs-12 fw-400 color-bl"></div>
-        </div>
+      <div id="hideProgressAmount${index}" class="d-flex">
+        <div id="subtasksAmountTrue${index}" class="d-flex-center fs-12 fw-400 color-bl"></div>
+        <div id="subtasks${index}" class="subtasksLength fs-12 fw-400 color-bl"></div>
       </div>
-      <div class="d-flex-between width220">
-        <div class="user-image-bord-container" id="userImageBoard${index}"></div>
-        <div class="img-32 d-flex-center" id="prioPosition${index}"></div>
-      </div>  
-    </div>`;
+    </div>
+    <div class="d-flex-between width220">
+      <div class="user-image-bord-container" id="userImageBoard${index}"></div>
+      <div class="img-32 d-flex-center" id="prioPosition${index}"></div>
+    </div>
+  `;
+  position.appendChild(taskContainer);
 }
 
+/**
+ * Updates the user images display on the board based on assigned users.
+ * 
+ * @param {number} indexHTML - The index of the task in the HTML to display user images.
+ * @param {Array<number>} assignedTo - An array of indices representing users assigned to the task.
+ */
 function searchIndexUrlBoard(indexHTML, assignedTo) {
   let position = document.getElementById(`userImageBoard${indexHTML}`);
   position.innerHTML = "";
-  if (assignedTo == null) {
+  if (!assignedTo || assignedTo.length === 0) {
     return;
   }
   const maxImages = Math.min(assignedTo.length, 4);
+  const imagesHtml = [];
   for (let index = 0; index < maxImages; index++) {
     let imageUrlNumber = assignedTo[index];
     let imageUrlPositionFromArray = imageUrlBoard[imageUrlNumber];
-    position.innerHTML += `<img class="img-24" src="${imageUrlPositionFromArray}" alt="" />`;
+    if (imageUrlPositionFromArray) {
+      imagesHtml.push(`<img class="img-24" src="${imageUrlPositionFromArray}" alt="User Image" />`);
+    }
   }
+  position.innerHTML = imagesHtml.join("");
   if (assignedTo.length > 4) {
     const remaining = assignedTo.length - 4;
     position.innerHTML += `
@@ -235,19 +282,22 @@ function searchIndexUrlBoard(indexHTML, assignedTo) {
 }
 
 /**
- * Updates the user image display on the board for a specific task based on assigned users.
+ * Updates the display of subtasks count on the board for a specific task.
  * 
- * @param {number} indexHTML - The index of the task in the HTML to display user images.
- * @param {Array<number>} assignedTo - An array of indices representing users assigned to the task.
+ * @param {number} indexHtml - The index of the task in the HTML to display the count of subtasks.
+ * @param {Array<string>} subtasks - An array of subtasks associated with the task.
  */
 function subtasksRenderBoard(indexHtml, subtasks) {
-  let positionOfSubtasksLength = document.querySelector(`.subtasksLength${indexHtml}`);
-  if (positionOfSubtasksLength) {
+  let subtaskCountElement = document.querySelector(`.subtasksLength${indexHtml}`);
+  if (subtaskCountElement) {
     if (Array.isArray(subtasks)) {
-      positionOfSubtasksLength.innerHTML = `<p class="subtasks-board-task-text">${subtasks.length} Subtasks</p>`;
+      const count = subtasks.length;
+      subtaskCountElement.innerHTML = `<p class="subtasks-board-task-text">${count} Subtasks</p>`;
     } else {
-      positionOfSubtasksLength.innerHTML = `<p class="subtasks-board-task-text">0 Subtasks</p>`;
+      subtaskCountElement.innerHTML = `<p class="subtasks-board-task-text">0 Subtasks</p>`;
     }
+  } else {
+    console.error(`Element mit der Klasse .subtasksLength${indexHtml} wurde nicht gefunden.`);
   }
 }
 
@@ -259,7 +309,11 @@ function subtasksRenderBoard(indexHtml, subtasks) {
  */
 function CategoryColor(index, category) {
   let position = document.getElementById(`categoryColor${index}`);
-  if (category == TechnicalTask) {
+  if (!position) {
+    console.error(`Element mit ID categoryColor${index} wurde nicht gefunden.`);
+    return;
+  }
+  if (category === "TechnicalTask") {
     position.style.backgroundColor = "#1fd7c1";
   } else {
     position.style.backgroundColor = "#0038ff";
@@ -276,16 +330,18 @@ function CategoryColor(index, category) {
 function progressBar(index, subtasks, subtaskStatus) {
   let progressBar = document.getElementById(`progressBar${index}`);
   let positionOfTrueAmount = document.getElementById(`subtasksAmountTrue${index}`);
-
-  if (!subtasks || subtasks.length === 0) {
+  if (!Array.isArray(subtasks) || subtasks.length === 0 || !Array.isArray(subtaskStatus)) {
     positionOfTrueAmount.innerHTML = "0/0";
     progressBar.style.width = "0%";
     return;
   }
-
   let { trueCount, totalCount } = calculateProgress(index, subtasks, subtaskStatus);
+  if (totalCount === 0) {
+    positionOfTrueAmount.innerHTML = "0/0";
+    progressBar.style.width = "0%";
+    return;
+  }
   positionOfTrueAmount.innerHTML = `${trueCount}/${totalCount}`;
-  
   let progressPercentage = (trueCount / totalCount) * 100;
   updateProgressBar(index, progressPercentage);
 }
@@ -293,20 +349,24 @@ function progressBar(index, subtasks, subtaskStatus) {
 /**
  * Updates the progress bar width and color based on the percentage of completed subtasks.
  *
- * @param {number} indexHtml - The index of the task in the HTML structure.
+ * @param {number} index - The index of the task in the HTML structure.
  * @param {number} progressPercentage - The calculated percentage of completed subtasks.
  */
-function updateProgressBar(index, progressPercentage, subtasks) {
+function updateProgressBar(index, progressPercentage) {
   let progressBar = document.getElementById(`progressBar${index}`);
   if (!progressBar) {
     console.error(`Element nicht gefunden: progressBar${index}`);
+    return;
+  }
+  if (progressPercentage < 0 || progressPercentage > 100) {
+    console.error(`Ungültiger Fortschrittsprozentsatz: ${progressPercentage}. Muss zwischen 0 und 100 liegen.`);
     return;
   }
   progressBar.style.width = `${progressPercentage}%`;
   if (progressPercentage === 100) {
     progressBar.style.backgroundColor = "#095a1b";
   } else {
-    progressBar.style.backgroundColor = "";
+    progressBar.style.backgroundColor = "#007bff";
   }
 }
 
@@ -320,18 +380,20 @@ function updateProgressBar(index, progressPercentage, subtasks) {
  */
 function calculateProgress(index, subtasks, subtaskStatus) {
   let trueCount = 0;
-  if (!Array.isArray(subtasks)) {
-    console.warn(`Subtasks ist kein gültiges Array für Task ${index}`);
+  if (!Array.isArray(subtasks) || !Array.isArray(subtaskStatus)) {
+    console.warn(`Subtasks oder SubtaskStatus ist kein gültiges Array für Task ${index}`);
     return { trueCount: 0, totalCount: 0 };
   }
-
   let totalCount = subtasks.length;
+  if (totalCount !== subtaskStatus.length) {
+    console.warn(`Unterschiedliche Längen von Subtasks und SubtaskStatus für Task ${index}`);
+    return { trueCount: 0, totalCount: totalCount };
+  }
   for (let i = 0; i < totalCount; i++) {
-    if (subtaskStatus[i] === true || 0) {
+    if (subtaskStatus[i] === true || subtaskStatus[i] === 1 || subtaskStatus[i] === 'true') {
       trueCount++;
     }
-  } 
-
+  }
   return { trueCount, totalCount };
 }
 
@@ -349,22 +411,26 @@ function calculateProgress(index, subtasks, subtaskStatus) {
  * @param {Array<string>} subtasks - An array of subtasks related to the task.
  * @param {Array<boolean>} subtaskStatus - An array representing the completion status of each subtask.
  */
-function openTaskToBoardRender(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks , subtaskStatus) {
-  opentaskIndex = index;
+function openTaskToBoardRender(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus) {
+  let opentaskIndex = index;
   let position = document.getElementById("openTask");
+  if (!position) {
+    console.error("Element with ID 'openTask' not found.");
+    return;
+  }
   if (position.classList.contains("modal-overlay")) {
     return;
   } else {
     position.classList.add("modal-overlay");
     position.classList.remove("d-none", "hidden");
     position.style.cssText = "visibility: visible; transform: translateX(100vw); animation: moveIn 200ms ease-in forwards";
-    position.innerHTML = openTaskToBoardHtml(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks , subtaskStatus);
+    position.innerHTML = openTaskToBoardHtml(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus);
     CategoryColorOpen(index, category);
     subtasksRenderOpen(index, subtasks);
     searchIndexUrlOpen(index, assignedTo);
     searchprioBoardOpen(index, prio);
     loadSubtaskStatus(index, subtaskStatus);
-    console.log(subtaskStatus)
+    console.log(subtaskStatus);
   }
 }
 
@@ -375,25 +441,21 @@ function openTaskToBoardRender(index, category, description, dueDate, prio, titl
  * @param {string} subtaskStatus - A comma-separated string representing the completion status of each subtask.
  */
 function loadSubtaskStatus(indexHtml, subtaskStatus) {
-  console.log(subtaskStatus)
-  let subtaskStatusArrayDev = subtaskStatus.split(',').map(subtaskStatus => subtaskStatus.trim());
-  subtaskStatusArray.push(subtaskStatusArrayDev);
-  for (let index = 0; index < subtaskStatusArray.length; index++) {
-    const element = subtaskStatusArray[index];
-   console.log(element)
-    if (element== null) {
-      return;
+  console.log(subtaskStatus);
+  if (!subtaskStatus || typeof subtaskStatus !== 'string' || subtaskStatus.trim() === '') {
+    console.error('Invalid subtask status string provided.');
+    return;
+  }
+  let subtaskStatusArrayDev = subtaskStatus.split(',').map(status => status.trim());
+  for (let i = 0; i < subtaskStatusArrayDev.length; i++) {
+    const subStatus = subtaskStatusArrayDev[i];
+    console.log(subStatus);
+    let checkbox = document.getElementById(`subtask-${indexHtml}-${i}`);
+    if (checkbox) {
+      checkbox.checked = (subStatus === 'true');
+    } else {
+      console.warn(`Checkbox with ID subtask-${indexHtml}-${i} not found.`);
     }
-    for (let i = 0; i < element.length; i++) {
-      const subStatus = element[i];
-      console.log(subStatus)
-      subtasksStatusArray.push(subStatus);
-      let checkbox = document.getElementById(`subtask-${indexHtml}-${i}`);
-      if (checkbox) {
-        checkbox.checked = (subStatus === 'true');
-      }
-    }
-    subtaskStatusArray = [];
   }
 }
 
@@ -406,8 +468,17 @@ function loadSubtaskStatus(indexHtml, subtaskStatus) {
  */
 async function subtaskStatus(indexHtml, index) {
   const checkbox = document.getElementById(`subtask-${indexHtml}-${index}`);
+  if (!checkbox) {
+    console.error(`Checkbox with ID subtask-${indexHtml}-${index} not found.`);
+    return;
+  }
   const isChecked = checkbox.checked;
-  await statusSubtaskSaveToFirebase(isChecked, indexHtml, index);
+  try {
+    await statusSubtaskSaveToFirebase(isChecked, indexHtml, index);
+    console.log(`Subtask status for index ${index} updated successfully to ${isChecked}.`);
+  } catch (error) {
+    console.error(`Failed to save subtask status for index ${index}:`, error);
+  }
 }
 
 /**
@@ -418,17 +489,20 @@ async function subtaskStatus(indexHtml, index) {
  */
 function searchprioBoardOpen(index, prio) {
   let position = document.getElementById(`prioPositionOpenTask${index}`);
-  position.innerHTML = "";
-  if (prio == "Urgent") {
-    position.innerHTML = `<img  src="../public/img/Prio alta.png" alt="">`;
+  if (!position) {
+      console.warn(`Element with ID prioPositionOpenTask${index} not found.`);
+      return;
+  }
+  const priorityImages = {
+      "Urgent": "../public/img/Prio alta.png",
+      "Medium": "../public/img/prioOrange.png",
+      "Low": "../public/img/Prio baja.png"
+  };
+  const imageSrc = priorityImages[prio] || "";
+  if (imageSrc) {
+      position.innerHTML = `<img src="${imageSrc}" alt="${prio} Priority">`;
   } else {
-    if (prio == "Medium") {
-      position.innerHTML = `<img  src="../public/img/prioOrange.png" alt="">`;
-    } else {
-      if (prio == "Low") {
-        position.innerHTML = `<img src="../public/img/Prio baja.png" alt="">`;
-      }
-    }
+      position.innerHTML = "";
   }
 }
 
@@ -438,61 +512,81 @@ function searchprioBoardOpen(index, prio) {
  * @param {number} index - The index of the task for which to display assigned user information.
  * @param {string} assignedTo - A comma-separated string of user IDs assigned to the task.
  */
-function searchIndexUrlOpen(index, assignedTo) {
- console.log(assignedTo)
- if(assignedTo == 'undefined'){
-  return
- }
-  let assignedToArray = assignedTo.split(',').map(assignedTo => assignedTo.trim());
-  assignedToUserArrayOpen.push(assignedToArray);
+function searchIndexUrlOpen(assignedTo) {
+  console.log('assignedTo:', assignedTo, 'Type:', typeof assignedTo);
+  if (typeof assignedTo !== 'string') {
+      console.error(`Expected assignedTo to be a string, got ${typeof assignedTo}.`);
+      return;
+  }
+  assignedTo = assignedTo.trim();
+  let assignedToArray = assignedTo.split(',').map(user => user.trim());
   let position = document.getElementById(`userImageBoardOpen${index}`);
   position.innerHTML = "";
   for (let i = 0; i < assignedToArray.length; i++) {
-    const element = assignedToArray[i];
-    const images = imageUrlBoard[element];
-    const names = userNamesBoard[element]
-    position.innerHTML +=  htmlBoardImageOpen(images,names, i);
+      const element = assignedToArray[i];
+      const images = imageUrlBoard[element];
+      const names = userNamesBoard[element];
+      if (images && names) {
+          position.innerHTML += htmlBoardImageOpen(images, names, i);
+      } else {
+          console.warn(`No image or name found for user ID: ${element}`);
+      }
   }
-  assignedToArray = [];
-  assignedToUserArrayOpen = [];
 }
 
 /**
  * Generates HTML for displaying a user's image and name in the open task view.
  * 
- * @param {string} images - The URL of the user's image.
- * @param {string} names - The name of the user.
- * @param {number} i - The index of the user in the assigned list.
+ * @param {string} imageUrl - The URL of the user's image.
+ * @param {string} userName - The name of the user.
+ * @param {number} index - The index of the user in the assigned list.
  * @returns {string} - The HTML string for the user's image and name.
  */
-function htmlBoardImageOpen(images,names, i) {
+function htmlBoardImageOpen(imageUrl, userName, index) {
+  const fallbackImageUrl = '../public/img/defaultUserImage.png';
+  const validImageUrl = imageUrl ? imageUrl : fallbackImageUrl;
   return `
     <div class="d-flex pa-7-16">
-      <img class="user-image-task-open" src="${images}">
-      <div class="d-flex item-center font-sf fs-19 fw-400">${names}</div>
+      <img class="user-image-task-open" src="${validImageUrl}" alt="${userName}'s profile picture">
+      <div class="d-flex item-center font-sf fs-19 fw-400">${userName}</div>
     </div>`;
 }
 
-/**
- * Renders the subtasks for a specific task in the open task view.
- * 
- * @param {number} indexHtml - The index of the task for which to render subtasks.
- * @param {string} subtasks - A comma-separated string of subtasks associated with the task.
- */
-function subtasksRenderOpen(indexHtml, subtasks) {
- console.log(subtasks)
-  if(subtasks == 'undefined'){
-    return
+async function subtasksRenderOpen(indexHtml, subtasks) {
+  if (typeof subtasks !== 'string') {
+      console.error(`Expected subtasks to be a string, got ${typeof subtasks}.`);
+      return;
   }
-  let subtasksArray = subtasks.split(',').map(subtask => subtask.trim());
-  subtasksOpenArray.push(subtasksArray);
-  let position = document.getElementById(`subtasksBoardOpen${indexHtml}`);
+  const subtasksArray = subtasks.split(',').map(subtask => subtask.trim());
+  const position = document.getElementById(`subtasksBoardOpen${indexHtml}`);
+  if (!position) {
+      console.error(`Element mit der ID 'subtasksBoardOpen${indexHtml}' nicht gefunden.`);
+      return;
+  }
   position.innerHTML = "";
-  for (let i = 0; i < subtasksArray.length; i++) {
-      const element = subtasksArray[i];
-      position.innerHTML += subtasksRenderOpenHtml(indexHtml, i, element);
-  }
-  subtasksOpenArray = [];
+  subtasksArray.forEach((element, i) => {
+      if (i < subtasksArray.length) {
+          position.innerHTML += subtasksRenderOpenHtml(indexHtml, i, element);
+      } else {
+          console.error(`Index ${i} liegt außerhalb der Grenzen des Subtasks-Arrays.`);
+      }
+  });
+}
+
+/**
+ * Generates HTML for a subtask checkbox.
+ * 
+ * @param {number} indexHtml - The index of the task.
+ * @param {number} index - The index of the subtask.
+ * @param {string} element - The name of the subtask.
+ * @returns {string} The generated HTML for the subtask.
+ */
+function subtasksRenderOpenHtml(indexHtml, index, element) {
+  return `
+    <div class="d-flex item-center pa-7-16">
+      <input onclick="subtaskStatus('${indexHtml}', '${index}')" class="checkbox-open-Task pointer" type="checkbox" id="subtask-${indexHtml}-${index}">
+      <label for="subtask-${indexHtml}-${index}">${element}</label>
+    </div>`;
 }
 
 /**
@@ -502,22 +596,13 @@ function subtasksRenderOpen(indexHtml, subtasks) {
  * @param {number} indexHtml - The index of the task in the global task keys.
  * @param {number} index - The index of the subtask.
  */
-function subtasksRenderOpenHtml(indexHtml, index, element) {
-  return `
-    <div class="d-flex item-center pa-7-16">
-      <input onclick="subtaskStatus('${indexHtml}','${index}')" class="checkbox-open-Task pointer" type="checkbox" id="subtask-${indexHtml}-${index}">
-      <label for="subtask-${indexHtml}-${index}">${element}</label>
-    </div>`;
-}
-
-/**
- * Sets the background color of the category element based on the category type.
- * 
- * @param {number} index - The index of the task.
- * @param {string} category - The category of the task.
- */
 async function statusSubtaskSaveToFirebase(isChecked, indexHtml, index) {
-  for (const taskKeyId of taskkeysGlobal.map((el) => el[indexHtml])) {
+  if (!Array.isArray(taskkeysGlobal) || taskkeysGlobal.length === 0) {
+    console.error("taskkeysGlobal is not defined or is empty.");
+    return;
+  }
+  let successfulUpdates = 0;
+  for (const taskKeyId of taskkeysGlobal.map(el => el[indexHtml])) {
     const path = `/tasks/${taskKeyId}/0/subtaskStatus/${index}`;
     try {
       const response = await fetch(`${BASE_URL}${path}.json`, {
@@ -527,13 +612,14 @@ async function statusSubtaskSaveToFirebase(isChecked, indexHtml, index) {
       });
       if (!response.ok) {
         console.error(`Error updating status of subtask checkbox ${index}:`, response.statusText);
+      } else {
+        successfulUpdates++;
       }
     } catch (error) {
       console.error(`Error saving status of subtask checkbox ${index}:`, error);
     }
   }
-  subtasksOpenArray = [];
-
+  console.log(`Successfully updated status of ${successfulUpdates} subtasks.`);
 }
 
 /**
@@ -543,12 +629,16 @@ async function statusSubtaskSaveToFirebase(isChecked, indexHtml, index) {
  * @param {string} category - The category of the task.
  */
 function CategoryColorOpen(index, category) {
-  let position = document.getElementById(`categoryColorOpen${index}`);
-  if (category == "Technical Task") {
-    position.style.backgroundColor = "#1fd7c1";
-  } else {
-    position.style.backgroundColor = "#0038ff";
+  const position = document.getElementById(`categoryColorOpen${index}`);
+  if (!position) {
+    console.error(`Element with ID 'categoryColorOpen${index}' not found.`);
+    return;
   }
+  const categoryColors = {
+    "Technical Task": "#1fd7c1",
+    "Default": "#0038ff"
+  };
+  position.style.backgroundColor = categoryColors[category] || categoryColors["Default"];
 }
 
 /**
@@ -556,18 +646,20 @@ function CategoryColorOpen(index, category) {
  * 
  * @param {Event} event - The click event that triggered the function.
  */
-function oneClickClose(event) {
-  let openPosition = document.getElementById("openTask");
+function closeTaskModalOnOverlayClick(event) {
+  const openPosition = document.getElementById("openTask");
+  if (!openPosition) {
+    console.error("Element with ID 'openTask' not found.");
+    return;
+  }
   if (event.target.classList.contains("modal-overlay")) {
-    openPosition.classList.remove("modal-overlay");
     openPosition.style.animation = "moveOut 200ms ease-out forwards";
-    setTimeout(() => {
+    openPosition.addEventListener('animationend', () => {
       openPosition.classList.add("hidden", "d-none");
-      openPosition.style.cssText =
-        "visibility: hidden; transform: translateX(100vw)";
-    }, 100);
+      openPosition.style.cssText = "visibility: hidden; transform: translateX(100vw)";
+    }, { once: true });
+
     initDataBoard();
-   //console.log(opentaskIndex)
     resetFormStateEdit();
   }
 }
@@ -588,46 +680,61 @@ function oneClickClose(event) {
  * 
  * @returns {string} The generated HTML markup for the open task.
  */
-function openTaskToBoardHtml(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks , subtaskStatus) {
+function openTaskToBoardHtml(index, category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus) {
+  function escapeHtml(text) {
+      const element = document.createElement('div');
+      element.innerText = text;
+      return element.innerHTML;
+  }
+
+  if (typeof index !== 'number' || !category || !description || !dueDate || !prio || !title) {
+      console.error('Invalid input parameters');
+      return '';
+  }
+
   return `
-    <div class="board-task-container-open bradius24 bg-color-ww d-flex content-centr" id="parentContainer${index}">
-        <div class="task-responsive width445">  
+  <div class="board-task-container-open bradius24 bg-color-ww d-flex content-centr" id="parentContainer${index}">
+      <div class="task-responsive width445">  
           <div class="d-flex-between margin-bt8">
-              <h1 id="categoryColorOpen${index}" class=" txt-center fs-16 mg-block-none bradius8 color-wh">${category}</h1>
-              <img onclick="closeOpenTask(event, ${index})" id="closeOpenTask${index}" class="close-open-task-img" src="../public/img/Close.png">
+              <h1 id="categoryColorOpen${index}" class="txt-center fs-16 mg-block-none bradius8 color-wh">${escapeHtml(category)}</h1>
+              <img onclick="closeOpenTask(event, ${index})" id="closeOpenTask${index}" class="close-open-task-img" src="../public/img/Close.png" alt="Close Task">
           </div>
           <div class="margin-bt8">
-                <h2 class="task-title mg-block-none fw-700 fs-61">${title}</h2>
+              <h2 class="task-title mg-block-none fw-700 fs-61">${escapeHtml(title)}</h2>
           </div>
           <div class="margin-bt8">  
-              <p class="description-open-task fs-20 fw-400 mg-block-none">${description}</p>
+              <p class="description-open-task fs-20 fw-400 mg-block-none">${escapeHtml(description)}</p>
           </div> 
           <div class="d-flex item-center mg-btt25" id="dateTask${index}">
               <p class="d-flex item-center fs-20 fw-700 mg-block-none color-dg">Due date:</p>
-              <p class="d-flex item-center fs-20 fw-400 mg-block-none margin-left-open-task">${dueDate}</p>
+              <p class="d-flex item-center fs-20 fw-400 mg-block-none margin-left-open-task">${escapeHtml(dueDate)}</p>
           </div>
           <div class="d-flex item-center mg-btt25" id="prioTask${index}">
               <p class="d-flex item-center fs-20 fw-700 color-dg mg-block-none">Priority:</p>
-              <span class="d-flex item-center fs-16 fw-400 margin-left-open-task">${prio}</span>
-              <div class="prio-board-image-container d-flex-center" id="prioPositionOpenTask${index}">
-              </div>
+              <span class="d-flex item-center fs-16 fw-400 margin-left-open-task">${escapeHtml(prio)}</span>
+              <div class="prio-board-image-container d-flex-center" id="prioPositionOpenTask${index}"></div>
           </div>
           <div class="mg-btt25">
               <p class="d-flex item-center fs-20 fw-700 color-dg mg-block-none">Assigned To:</p>
           </div>
           <div class="d-flex mg-btt25 assignedToScroll">
-              <div class="user-image-bord-container-open" id="userImageBoardOpen${index}">
-              </div>
+              <div class="user-image-bord-container-open" id="userImageBoardOpen${index}"></div>
           </div>
           <p class="d-flex item-center fs-20 fw-700 color-dg mg-block-inline">Subtasks:</p>    
-              <div class="subtask-scrollbar" id="subtasksBoardOpen${index}"></div>
+          <div class="subtask-scrollbar" id="subtasksBoardOpen${index}"></div>
           <div class="d-flex-end">
-            <div class="d-flex item-center">
-              <div onclick="deleteTask(${index})" class="d-flex item-center pointer"><img class="open-task-delete-edit img" src="../public/img/deleteOpenTask.png"><p class="fs-16 mg-block-none">Delete</p></div>
-              <div class="seperator-opentask"></div>
-              <div onclick="EditTaskToBoardRender('${index}', '${category}', '${description}', '${dueDate}', '${prio}', '${title}', '${boardCategory}' , '${assignedTo}', '${subtasks}', '${subtaskStatus}')" class="d-flex item-center pointer"><img class="open-task-delete-edit img" src="../public/img/editOpenTask.png"><p class="fs-16 mg-block-none">Edit</p></div>
-            </div>
+              <div class="d-flex item-center">
+                  <div onclick="deleteTask(${index})" class="d-flex item-center pointer">
+                      <img class="open-task-delete-edit img" src="../public/img/deleteOpenTask.png" alt="Delete Task">
+                      <p class="fs-16 mg-block-none">Delete</p>
+                  </div>
+                  <div class="seperator-opentask"></div>
+                  <div onclick="EditTaskToBoardRender('${index}', '${escapeHtml(category)}', '${escapeHtml(description)}', '${escapeHtml(dueDate)}', '${escapeHtml(prio)}', '${escapeHtml(title)}', '${escapeHtml(boardCategory)}', '${escapeHtml(assignedTo)}', '${escapeHtml(subtasks)}', '${escapeHtml(subtaskStatus)}')" class="d-flex item-center pointer">
+                      <img class="open-task-delete-edit img" src="../public/img/editOpenTask.png" alt="Edit Task">
+                      <p class="fs-16 mg-block-none">Edit</p>
+                  </div>
+              </div>
           </div>
-        </div>  
-    </div>`;
+      </div>  
+  </div>`;
 };
