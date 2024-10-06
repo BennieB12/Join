@@ -8,12 +8,15 @@
  * @returns {string} - The generated HTML string for the checkbox element.
  */
 function showSubtaskControlsEdit(index, subtasks) {
-    if (subtasks === undefined && arrayForSubtasks.length > 0) {
+    if (subtasks === undefined) {
+        if(arrayForSubtasks === undefined){
+            return
+        }else{
         subtasks = arrayForSubtasks.join(',');
-    }
+    }}
     document.getElementById(`subtasksEdit${index}`).classList.remove('add-task-input-edit');
     document.getElementById(`subtasksEdit${index}`).classList.add('subtasks-input-edit');
-
+    
     let position = document.getElementById(`subtasksControl${index}`);
     position.innerHTML = `<button onclick="resetSubtaskInputEdit('${index}','${subtasks}')" type="button" class="subtask-button-edit">
                                 <img src="../public/img/closeAddTask.png" alt="Reset">
@@ -29,72 +32,62 @@ function showSubtaskControlsEdit(index, subtasks) {
  * 
  * @param {number} index - The index of the subtask to edit.
  */
-function editSubtaskEdit(i, indexHTML, subtask) {
+function editSubtaskEdit(i, indexHTML, subtask, subtasksEditArrayOrigin) {
     let position = document.getElementById(`supplementarySubtaskEdit${i}`);
     position.classList.remove('subtasks-edit');
     position.classList.add('subtasks-edit-input');
-
-    arrayForSubtasks = subtask.split(',')
-        .map(subtask => subtask.trim())
-        .filter(subtask => subtask !== 'undefined' && subtask !== "");
-    console.log(arrayForSubtasks);
-    
-    if (i >= arrayForSubtasks.length) {
-        console.error(`Index ${i} liegt außerhalb der Grenzen des Subtasks-Arrays.`);
-        return;
-    }
-    
+    let arrayForSubtasks = subtask.split(',')
+    .map(subtask => subtask.trim())
+    .filter(subtask => subtask !== 'undefined' && subtask !== "");
+  console.log(arrayForSubtasks);
     let arrayPosition = arrayForSubtasks[i];
-    console.log(arrayPosition);
-
-    position.innerHTML = editSubtaskHTMLEdit(i, indexHTML, arrayPosition);
-}
-
+    console.log(arrayPosition)
+  
+    position.innerHTML = editSubtaskHTMLEdit(i, indexHTML, subtask, subtasksEditArrayOrigin, arrayPosition);
+  }
+  
 /**
  * Renders an editable input field for a subtask with options to delete or finish editing.
  *
  * @param {number} i - The index of the subtask being edited.
  * @param {number} indexHTML - The index of the HTML element related to the main task.
- * @param {string} arrayPosition - The current value of the subtask being edited.
+ * @param {string} subtask - The current value of the subtask that is being edited.
+ * @param {string} subtasksEditArrayOrigin - The original array of subtasks used for reference.
  */
-function editSubtaskHTMLEdit(i, indexHTML, arrayPosition) {
-    return `
-        <input id="inputEditSubtasks${i}" class="inputAddTaskSubtasks fs-16" value="${arrayPosition}">
+function editSubtaskHTMLEdit(i, indexHTML, subtask, subtasksEditArrayOrigin, arrayPosition) {
+   return`
+        <input id="inputEditSubtasks${i}" class="inputAddTaskSubtasks fs-16" value="${arrayPosition}" >
         <div class="d-flex item-center">
-            <img class="img-24 pointer p-4" onclick="deleteSubtaskEdit('${i}','${indexHTML}')" src="../public/img/delete.png">
+            <img class="img-24 pointer p-4" onclick="deleteSubtaskEdit('${i}','${indexHTML}', '${subtasksEditArrayOrigin}')" src="../public/img/delete.png">
             <div class="seperator-subtasks"></div>
-            <img class="img-24 pointer p-4" onclick="validateAndFinishEdit('${i}','${indexHTML}')" src="../public/img/checkAddTask.png" alt="Add">
+            <img class="img-24 pointer p-4" onclick="validateAndFinishEdit('${i}','${indexHTML}', '${subtasksEditArrayOrigin}')" src="../public/img/checkAddTask.png" alt="Add">
         </div>`;
 }
 
 /**
  * Validates the input length for the subtask and finishes editing if valid.
  * 
- * @param {number} i - The index of the subtask being edited.
- * @param {number} indexHTML - The index of the HTML element related to the main task.
+ * @param {number} index - The index of the subtask being edited.
  */
-function validateAndFinishEdit(i, indexHTML) {
+function validateAndFinishEdit(i, indexHTML, subtasksEditArrayOrigin) {
     const input = document.getElementById(`inputEditSubtasks${i}`);
-    const trimmedValue = input.value.trim();
-
-    if (trimmedValue.length >= 2) {
-        finishSubtaskEdit(i, indexHTML);
-    } else {
-        console.error('Der Subtask muss mindestens 2 Zeichen lang sein.');
-    }
-}
-
+    if (input.value.length >= 2) {
+        finishSubtaskEdit(i, indexHTML, subtasksEditArrayOrigin);
+    } 
+  }
+  
 /**
  * Finishes editing a subtask by updating its value in the subtasks array and re-rendering the list of subtasks.
  *
  * @param {number} i - The index of the subtask being edited.
  * @param {number} indexHTML - The index of the HTML element related to the main task.
+ * @param {string} subtasksEditArrayOrigin - The original array of subtasks as a comma-separated string.
  */
-function finishSubtaskEdit(i, indexHTML) {
+function finishSubtaskEdit(i, indexHTML, subtasksEditArrayOrigin) {
+   
     let input = document.getElementById(`inputEditSubtasks${i}`);
     arrayForSubtasks[i] = input.value;
-    console.log(arrayForSubtasks);
-
+    console.log(arrayForSubtasks)
     subtasksRenderOpenEdit(indexHTML, arrayForSubtasks);
 }
 
