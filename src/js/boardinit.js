@@ -125,3 +125,71 @@ async function subtaskStatus(indexHtml, index) {
     progressBar(indexHtml, subtasks, subtaskStatus);
   });
 }
+
+/**
+ * Calculates the count of completed subtasks and the total number of subtasks for a given task.
+ *
+ * @param {number} index - The index of the task for which to calculate progress.
+ * @param {Array} subtasks - An array of subtasks associated with the task.
+ * @param {Array} subtaskStatus - An array representing the completion status of each subtask.
+ * @returns {{ trueCount: number, totalCount: number }} - An object containing the counts of completed and total subtasks.
+ */
+function calculateProgress(index, subtasks, subtaskStatus) {
+  let trueCount = 0;
+  if (!Array.isArray(subtasks)) {
+    console.warn(`Subtasks ist kein gültiges Array für Task ${index}`);
+    return { trueCount: 0, totalCount: 0 };
+  }
+  let totalCount = subtasks.length;
+  for (let i = 0; i < totalCount; i++) {
+    if (subtaskStatus[i] === true || 0) {
+      trueCount++;
+    }
+  }
+  return { trueCount, totalCount };
+}
+
+
+let currentDraggedElement;
+/**
+ * Clears and updates the HTML content of task categories on the board.
+ * The function clears the content of predefined task categories and then
+ * reloads the board data and updates the HTML content.
+ *
+ * @async
+ */
+async function updateHTML() {
+  const categories = ["todo", "progress", "feedback", "done"];
+  for (const category of categories) {
+    const container = document.getElementById(category);
+    container.innerHTML = "";
+  }
+  try {
+    await initDataBoard();
+  } catch (error) {
+    console.error("Error updating HTML content:", error);
+  }
+}
+
+/**
+ * Filters tasks based on the search input.
+ * Displays tasks that match the search query (starting from 3 characters).
+ * If the input is cleared, all tasks are shown again.
+ */
+function searchTasks() {
+  const searchInputElement = document.querySelector(".search-task-web");
+  const searchInput = searchInputElement.value.toLowerCase();
+  let allTasks = document.getElementsByTagName("div");
+  for (let i = 0; i < allTasks.length; i++) {
+    let task = allTasks[i];
+    if (task.id.startsWith("parentContainer")) {
+      let title = task.getElementsByTagName("h2")[0].innerHTML.toLowerCase();
+      let discript = task.getElementsByTagName("p")[0].innerHTML.toLowerCase();
+      if (searchInput.length < 3 || title.includes(searchInput) || discript.includes(searchInput)) {
+        task.style.display = "block";
+      } else {
+        task.style.display = "none";
+      }
+    }
+  }
+}

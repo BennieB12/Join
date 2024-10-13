@@ -104,3 +104,59 @@ function searchprioBoard(index, prio) {
       }
     }
   }
+
+  /**
+ * Updates the progress bar and displayed count of completed subtasks for a specific task.
+ *
+ * @param {number} index - The index of the task for which to update the progress bar.
+ * @param {Array} subtasks - An array of subtasks associated with the task.
+ * @param {Array} subtaskStatus - An array representing the completion status of each subtask.
+ */
+function progressBar(index, subtasks, subtaskStatus) {
+  let progressBar = document.getElementById(`progressBar${index}`);
+  let positionOfTrueAmount = document.getElementById(`subtasksAmountTrue${index}`);
+  if (!subtasks || subtasks.length === 0) {
+    positionOfTrueAmount.innerHTML = "0/0";
+    progressBar.style.width = "0%";
+    return;
+  }
+  let { trueCount, totalCount } = calculateProgress(index, subtasks, subtaskStatus);
+  positionOfTrueAmount.innerHTML = `${trueCount}/${totalCount}`;
+  let progressPercentage = (trueCount / totalCount) * 100;
+  updateProgressBar(index, progressPercentage);
+}
+
+/**
+ * Updates the progress bar width and color based on the percentage of completed subtasks.
+ *
+ * @param {number} indexHtml - The index of the task in the HTML structure.
+ * @param {number} progressPercentage - The calculated percentage of completed subtasks.
+ */
+function updateProgressBar(index, progressPercentage) {
+  let progressBar = document.getElementById(`progressBar${index}`);
+  if (!progressBar) {
+    console.error(`Element nicht gefunden: progressBar${index}`);
+    return;
+  }
+  progressBar.style.width = `${progressPercentage}%`;
+  if (progressPercentage === 100) {
+    progressBar.style.backgroundColor = "#095a1b";
+  } else {
+    progressBar.style.backgroundColor = "";
+  }
+}
+
+/**
+ * Sets the background color of a category element based on the specified category.
+ *
+ * @param {number} index - The index of the category element to update.
+ * @param {string} category - The category type (e.g., "TechnicalTask").
+ */
+function CategoryColor(index, category) {
+  let position = document.getElementById(`categoryColor${index}`);
+  if (category == TechnicalTask) {
+    position.style.backgroundColor = "#1fd7c1";
+  } else {
+    position.style.backgroundColor = "#0038ff";
+  }
+}
