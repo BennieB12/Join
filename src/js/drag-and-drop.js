@@ -4,6 +4,7 @@ document.addEventListener("mouseleave", handleRotateEnd);
 document.addEventListener("dragend", handleRotateEnd);
 
 let cachedElement = null;
+let currentDraggedElement;
 
 
 /**
@@ -64,31 +65,104 @@ function onDrop(event) {
 }
 
 
-/**
- * Moves the dragged task to a new category and updates the task in Firebase.
- *
- * @param {string} category - The new category to move the task to.
- * @async
- */
 async function moveTo(category) {
   if (currentDraggedElement) {
-    task[currentDraggedElement]["boardCategory"] = category;
+    const currentElement = document.getElementById(`parentContainer${currentDraggedElement}`);
+    if (currentElement) {
+      currentElement.remove();
+    }
 
-    await updateTaskInFirebase({
-      id: currentDraggedElement,
-      boardCategory: category,
-    });
+    try {
+      await updateTaskInFirebase({
+        id: currentDraggedElement,
+        boardCategory: category,
+      });
+    } catch (error) {
+      console.error("Error updating Firebase:", error);
+    }
 
-    await updateHTML();
-
+    await updateSingleTask(currentDraggedElement);
     let dragArea = document.getElementById(category);
     dragArea.classList.remove("highlight");
+    currentDraggedElement = null;
   } else {
     console.error("No task is being dragged.");
   }
 
   updateStatusMessages();
 }
+
+
+
+async function updateSingleTask(taskId) {
+  try {
+    let updatedTask = await fetchTaskFromFirebase(taskId);
+    const { category, description, dueDate, prio, title, boardCategory, assignedTo, subtasks, subtaskStatus } = updatedTask;
+
+    let currentTaskElement = document.getElementById(`parentContainer${taskId}`);
+    if (currentTaskElement) {
+      currentTaskElement.remove();
+    }
+    positionOfHTMLBlockBoard(
+      taskId,
+      category,
+      description,
+      dueDate,
+      prio,
+      title,
+      boardCategory,
+      assignedTo,
+      subtasks,
+      subtaskStatus
+    );
+    searchIndexUrlBoard(taskId, assignedTo);
+    searchprioBoard(taskId, prio);
+    subtasksRenderBoard(taskId, subtasks);
+    CategoryColor(taskId, category);
+    progressBar(taskId, subtasks, subtaskStatus);
+  } catch (error) {
+    console.error("Error updating task HTML:", error);
+  }
+}
+
+
+
+/**
+ * Fetches the updated task data from Firebase.
+ * 
+ * @param {string} taskId - The ID of the task to fetch.
+ * @returns {Promise<Object>} - A promise that resolves to the updated task data.
+ */
+async function fetchTaskFromFirebase(taskId) {
+  try {
+    const response = await fetch(`${BASE_URL}/tasks/${taskId}/0.json`);
+    const taskData = await response.json();
+    return taskData;
+  } catch (error) {
+    console.error("Error fetching task from Firebase:", error);
+  }
+}
+
+/**
+ * Clears and updates the HTML content of task categories on the board.
+ * The function clears the content of predefined task categories and then
+ * reloads the board data and updates the HTML content.
+ *
+ * @async
+ */
+async function updateHTML() {
+  const categories = ["todo", "progress", "feedback", "done"];
+  for (const category of categories) {
+    const container = document.getElementById(category);
+    container.innerHTML = "";
+  }
+  try {
+    await initDataBoard();
+  } catch (error) {
+    console.error("Error updating HTML content:", error);
+  }
+}
+
 
 
 /**
@@ -110,7 +184,6 @@ async function updateTaskInFirebase(task) {
     console.error("Error updating task in Firebase:", error);
   }
 }
-
 
 /**
  * to the specified drag area, visually indicating that the area is a valid drop target.
