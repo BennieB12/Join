@@ -8,6 +8,7 @@
     -ms-overflow-style: none;
     width: 100%;
     height: 100%;
+    padding-bottom: 220px;
   }
 
   .board-render-section::-webkit-scrollbar {
@@ -89,16 +90,7 @@
     scrollbar-color: #2a3647 #e0e0e0;
     -ms-overflow-style: none;
     width: 78%;
-    height: 90%;
-  }
-
-  .board-render-section {   
-    height: 150%;     
-    overflow-x: hidden;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    scrollbar-color: #2a3647 #e0e0e0;
-    -ms-overflow-style: none;
+    height: 120%;
   }
 
   .board-head-section-top {
@@ -141,12 +133,13 @@
   }
 
   .board-render-section {   
-    height: 200%;     
+    height: auto;     
     overflow-x: hidden;
     overflow-y: hidden;
     scrollbar-width: none;
     scrollbar-color: #2a3647 #e0e0e0;
     -ms-overflow-style: none;
+    padding-bottom: 80px;
   }
 
   .board-head-section-top {
@@ -286,12 +279,12 @@
     width: 100% !important;
   }
 
-  .board-render-section {   
+  /* .board-render-section {   
     height: 250%;     
     overflow-x: hidden;
     overflow-y: hidden;
     scrollbar-width: none;
     scrollbar-color: #2a3647 #e0e0e0;
     -ms-overflow-style: none;
-  }
+  } */
 }

@@ -29,4 +29,3 @@ Wenn du Fragen, Vorschläge oder Feedback hast, kannst du dich gerne an uns wend
 - [Benjamin](https://github.com/BennieB12)
 
 Wir hoffen, dass du Join genauso gerne benutzt, wie wir es gebaut haben. Viel Spaß beim Aufgaben-Management!
-# DA-JoinLIVE

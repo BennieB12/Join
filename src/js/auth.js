@@ -10,7 +10,7 @@ firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       const mainContent = document.querySelector(".main-content");
       const currentPage = mainContent.getAttribute("w3-include-html");
-      if (currentPage && currentPage.includes("summary.html")) {
+      if (currentPage && currentPage.includes("../public/summary.html")) {
         summaryGreeting();
       }
     }

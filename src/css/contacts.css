@@ -58,14 +58,13 @@ body {
 }
 
 .contactlist-content {
-  height: 80vh;
+  height: calc(92vh - 130px);
   width: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
   scrollbar-width: none;
   scrollbar-color: #2a3647 #e0e0e0;
   -ms-overflow-style: none;
-  scroll-margin-bottom: 0;
 }
 
 .add-contact-btn-responsive {

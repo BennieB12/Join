@@ -30,7 +30,7 @@ async function deleteTask(indexHTML) {
     let key = element[indexHTML];
     await deleteOnFirebase(key);
   }
-  changeSite("board.html");
+  changeSite("../public/board.html");
 }
 
 

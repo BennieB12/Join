@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/src/css/style.css" />
-    <link rel="stylesheet" href="/src/css/summary.css" />
-    <link rel="stylesheet" href="/src/css/utils.css" />
+    <link rel="stylesheet" href="../src/css/style.css" />
+    <link rel="stylesheet" href="../src/css/summary.css" />
+    <link rel="stylesheet" href="../src/css/utils.css" />
     <link rel="stylesheet" href="../src/css/utils2.css" />
     <title>JOIN - Summary</title>
   </head>
@@ -20,20 +20,20 @@
       <section class="summary-task-row">
         <div class="summary-tasks">
           <div class="summary-tasks-up">
-            <div class="summary-to-do d-flex-center pointer smry-btn" onclick="changeSite('board.html')">
+            <div class="summary-to-do d-flex-center pointer smry-btn" onclick="changeSite('../public/board.html')">
               <div class="summary-to-do-left">
-                <img src="/public/img/pencil.png" alt="pencil logo" class="default-img" />
-                <img src="/public/img/pencil_hover.png" alt="pencil hover logo" class="hover-img" />
+                <img src="../public/img/pencil.png" alt="pencil logo" class="default-img" />
+                <img src="../public/img/pencil_hover.png" alt="pencil hover logo" class="hover-img" />
               </div>
               <div class="summary-to-do-right d-flex-center flex-d-col">
                 <span class="td-num fs-64 fw-600" id="smry-to-do-val"></span>
                 <span class="td-txt fs-20 color-bg">To-do</span>
               </div>
             </div>
-            <div class="summary-done d-flex-center pointer smry-btn" onclick="changeSite('board.html')">
+            <div class="summary-done d-flex-center pointer smry-btn" onclick="changeSite('../public/board.html')">
               <div class="summary-done-left">
-                <img src="/public/img/check.png" alt="check logo" class="default-img" />
-                <img src="/public/img/check_hover.png" alt="check logo hover" class="hover-img" />
+                <img src="../public/img/check.png" alt="check logo" class="default-img" />
+                <img src="../public/img/check_hover.png" alt="check logo hover" class="hover-img" />
               </div>
               <div class="summary-done-right d-flex-center flex-d-col">
                 <span class="done-num fs-64 fw-600" id="smry-done-val"></span>
@@ -41,11 +41,11 @@
               </div>
             </div>
           </div>
-          <div class="summary-tasks-mid d-flex-around pointer smry-btn" onclick="changeSite('board.html')">
+          <div class="summary-tasks-mid d-flex-around pointer smry-btn" onclick="changeSite('../public/board.html')">
             <div class="summary-tasks-mid-left d-flex-center">
               <div class="summary-urgent-left">
-                <img src="/public/img/urgent.png" alt="urgent logo" class="default-img" />
-                <img src="/public/img/urgent_hover.png" alt="urgent logo hover" class="hover-img" />
+                <img src="../public/img/urgent.png" alt="urgent logo" class="default-img" />
+                <img src="../public/img/urgent_hover.png" alt="urgent logo hover" class="hover-img" />
               </div>
               <div class="summary-urgent-right d-flex-center flex-d-col">
                 <span class="urg-num fs-64 fw-600" id="smry-urgent-val"></span>
@@ -59,15 +59,15 @@
             </div>
           </div>
           <div class="summary-tasks-down">
-            <div class="summary-task-in-board d-flex-center flex-d-col pointer smry-btn" onclick="changeSite('board.html')">
+            <div class="summary-task-in-board d-flex-center flex-d-col pointer smry-btn" onclick="changeSite('../public/board.html')">
               <span class="board-num fs-64 fw-600" id="smry-board-val"></span>
               <span class="board-txt fs-20 color-dg txt-center plr-20">Tasks in Board</span>
             </div>
-            <div class="summary-task-in-progress d-flex-center flex-d-col pointer smry-btn" onclick="changeSite('board.html')">
+            <div class="summary-task-in-progress d-flex-center flex-d-col pointer smry-btn" onclick="changeSite('../public/board.html')">
               <span class="progress-num fs-64 fw-600" id="smry-progress-val"></span>
               <span class="progress-txt fs-20 color-dg txt-center plr-20">Tasks in Progress</span>
             </div>
-            <div class="summary-task-feedback d-flex-center flex-d-col pointer smry-btn" onclick="changeSite('board.html')">
+            <div class="summary-task-feedback d-flex-center flex-d-col pointer smry-btn" onclick="changeSite('../public/board.html')">
               <span class="feed-num fs-64 fw-600" id="smry-feedback-val"></span>
               <span class="feed-txt fs-20 color-dg txt-center plr-20">Awating Feedback</span>
             </div>
@@ -87,11 +87,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="/src/js/firebase_init.js"></script>
-    <script src="/src/js/authCheck.js"></script>
-    <script src="/src/js/auth.js"></script>
-    <script src="/src/js/script.js"></script>
-    <script src="/src/js/contact.js"></script>
-    <script src="/src/js/summary.js"></script>
+    <script src="../src/js/firebase_init.js"></script>
+    <script src="../src/js/authCheck.js"></script>
+    <script src="../src/js/auth.js"></script>
+    <script src="../src/js/script.js"></script>
+    <script src="../src/js/contact.js"></script>
+    <script src="../src/js/summary.js"></script>
   </body>
 </html>

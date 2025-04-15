@@ -233,7 +233,7 @@ async function createTask(event) {
   await defineTaskObjects();
   await saveToFirebase();
   resetUIAddTask(event.target);
-  changeSite("board.html");
+  changeSite("../public/board.html");
 }
 
 /**

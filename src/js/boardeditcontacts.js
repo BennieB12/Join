@@ -194,7 +194,7 @@ async function updateTaskBoard(index, category) {
   let positionTask = `/tasks/${taskkeys[index]}`;
   await saveToFirebaseEdit(positionTask);
   resetFormStateEdit();
-  changeSite("board.html");
+  changeSite("../public/board.html");
 }
 
 

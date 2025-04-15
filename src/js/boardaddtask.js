@@ -25,7 +25,7 @@ async function createTask2(event) {
   await defineTaskObjects2();
   await saveToFirebase2();
   resetUIAddTask2(event.target);
-  changeSite("board.html");
+  changeSite("../public/board.html");
 }
 
 function validateFormAddTask2(form) {

@@ -94,13 +94,18 @@
   .add-task-head {
     width: 100%;
     margin-top: 0;
+    padding-top: 10px;
     position: sticky;
     top: 0;
     background-color: #f6f7f8;
     z-index: 3;
+    height: auto;
+    justify-content: center;
   }
 
   .add-task-head h1 {
+    height: auto;
+    width: auto;
     font-size: 47px;
     font-weight: 700;
     line-height: 56.4px;
@@ -292,7 +297,7 @@
 
 @media (max-width: 430px) {
   .add-task-create-button {
-    max-width: 150px;
+    max-width: 170px;
   }
 
   .add-task-head {

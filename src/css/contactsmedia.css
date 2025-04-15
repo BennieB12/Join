@@ -23,7 +23,7 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    height: 200px;
+    height: auto;
     gap: 0;
   }
 
@@ -153,7 +153,7 @@
     position: relative;
     top: 0;
     left: 0;
-    height: 100% !important;
+    height: 90vh !important;
   }
 
   .contactlist-section > * {

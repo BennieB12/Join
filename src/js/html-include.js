@@ -39,14 +39,14 @@ async function includeHTML() {
 async function whichChangeSite(resp, element, file) {
   if (resp.ok) {
     element.innerHTML = await resp.text();
-    if (file.includes("addTask.html")) {
+    if (file.includes("../public/addTask.html")) {
       await init();
-    } else if (file.includes("contacts.html")) {
+    } else if (file.includes("../public/contacts.html")) {
       await initContacts();
-    } else if (file.includes("board.html")) {
+    } else if (file.includes("../public/board.html")) {
       await initDataBoard();
       updateStatusMessages();
-    } else if (file.includes("summary.html")) {
+    } else if (file.includes("../public/summary.html")) {
       await initSmry();
     } 
   } else {
