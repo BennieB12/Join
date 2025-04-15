@@ -269,16 +269,16 @@ input[type="password"]::-webkit-password-field {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   }
 
-  /* form {
-    width: 100%;
-  } */
+  form {
+    max-width: 100%;
+  }
 
   .signup-arrow {
     top: 15%;
   }
 
   .signup-input {
-    max-width: 100%;
+    max-width: none;
     padding: 8px 12px;
   }
 
