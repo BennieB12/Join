@@ -278,3 +278,29 @@
 .mg-bot-4 {
   margin-bottom: 4px;
 }
+
+
+.link-hover {
+  position: relative;
+  border: none;
+  font-size: 1rem;
+}
+
+.link-hover:hover {
+  color:  rgb(87, 188, 231);
+}
+
+.link-hover::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0%;
+  background-color: #2a3647;
+  transition: width 0.3s ease;
+}
+
+.link-hover:hover::after {
+  width: 100%;
+}
