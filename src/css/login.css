@@ -283,7 +283,8 @@ input[type="password"]::-webkit-password-field {
   }
 
   .submit-login-btn,
-  .login-signup-btn {
+  .login-signup-btn,
+  .submit-guest-login-btn {
     width: 180px;
     height: 40px;
     align-items: center;
@@ -342,12 +343,6 @@ input[type="password"]::-webkit-password-field {
     align-items: center;
     justify-content: center;
 }
-  
-
-  .submit-login-btn,
-  .submit-guest-login-btn {
-    height: 35px;
-  }
 
   #login-logo-invert {
     display: flex;
