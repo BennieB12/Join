@@ -223,7 +223,7 @@ body {
     font-family: "Inter";
     z-index: 1001;
   }
-  
+
   .summary-tasks {
     padding-top: 20px;
     width: 90vw;
@@ -299,7 +299,112 @@ body {
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 768px) {
+  .summary-section {
+    width: 100%;
+    padding: 8px;
+    height: 100%;
+    max-width: 100vw;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+
+  .summary-headline {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .summary-task-row {
+    padding: 8px;
+    display: block;
+  }
+
+  .summary-tasks {
+    display: flex;
+    align-items: center;
+    max-height: 50vh;
+    height: 100%;
+    padding: 8px;
+    margin-right: 0;
+    width: auto;
+    gap: 16px;
+    width: 95vw;
+  }
+
+
+  .summary-tasks-up {
+    margin: 0;
+    padding: 8px;
+    height: 33%;
+    width: 100%;
+    max-width: 70vw;
+    gap: 24px;
+  }
+  
+  .summary-to-do {
+    width: 50%;
+    height: auto;
+    margin: 0;
+    padding: 8px;
+  }
+  .summary-done {
+    height: auto;
+    width: 50%;
+  }
+
+.summary-tasks-mid {
+  width: 60vw;
+    height: 33%;
+    background-color: white;
+    border-radius: 30px;
+    padding: 8px;
+    margin: 0;
+    transition: transform 0.125s ease-in-out;
+}
+
+.summary-tasks-down {
+  margin: 0;
+  width: 70vw;
+  max-width: 100%;
+  height: 15vh;
+  gap: 16px;
+}
+.summary-task-in-board, .summary-task-feedback,
+.summary-task-in-progress {
+  margin: 0;
+  padding: 8px;
+}
+
+.summary-task-in-board span, .summary-task-feedback span,
+.summary-task-in-progress span {
+  padding: 0; 
+}
+
+.td-num,
+.done-num,
+.urg-num,
+.board-num,
+.progress-num,
+.feed-num {
+font-size: clamp(3rem, 12px, 2rem) !important;
+}
+
+ .td-txt,
+.done-txt,
+.urg-txt,
+.board-txt,
+.progress-txt,
+.feed-txt {
+font-size: clamp(1rem, 12px, 1rem) !important;
+}
+}
+
+/* @media (max-width: 380px) {
   .summary-section {
     padding-top: 10px;
     padding-left: 20px;
@@ -345,7 +450,7 @@ body {
     font-family: "Inter";
     z-index: 1001;
   }
-  
+
   .summary-tasks {
     display: flex;
     justify-content: flex-start;
@@ -360,24 +465,6 @@ body {
     width: 40px;
   }
 
-  .td-num,
-  .done-num,
-  .urg-num,
-  .board-num,
-  .progress-num,
-  .feed-num {
-    font-size: 36px !important;
-  }
-
-  .td-txt,
-  .done-txt,
-  .urg-txt,
-  .board-txt,
-  .progress-txt,
-  .feed-txt {
-    font-size: 12px !important;
-  }
-
   .summary-to-do,
   .summary-done {
     width: 140px;
@@ -387,13 +474,6 @@ body {
   .summary-tasks-up {
     height: 80px;
     margin: 5px;
-    width: 300px;
-  }
-
-  .summary-tasks-mid {
-    height: 80px;
-    margin: 5px;
-    border-radius: 20px;
     width: 300px;
   }
 
@@ -414,4 +494,4 @@ body {
   .summary-tasks-mid-divider {
     height: 80px;
   }
-}
+} */
