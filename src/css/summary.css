@@ -305,7 +305,8 @@ body {
     padding: 8px;
     height: 100%;
     max-width: 100vw;
-    max-height: 80vh;
+    max-height: 75vh;
+    gap: 36px;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -321,7 +322,7 @@ body {
 
   .summary-task-row {
     padding: 8px;
-    display: block;
+    justify-content: center;
   }
 
   .summary-tasks {
@@ -333,19 +334,18 @@ body {
     margin-right: 0;
     width: auto;
     gap: 16px;
-    width: 95vw;
+    width: 80vw;
   }
-
 
   .summary-tasks-up {
     margin: 0;
     padding: 8px;
     height: 33%;
     width: 100%;
-    max-width: 70vw;
+    max-width: 80vw;
     gap: 24px;
   }
-  
+
   .summary-to-do {
     width: 50%;
     height: auto;
@@ -357,141 +357,77 @@ body {
     width: 50%;
   }
 
-.summary-tasks-mid {
-  width: 60vw;
+  .summary-tasks-mid {
+    width: 70vw;
     height: 33%;
     background-color: white;
     border-radius: 30px;
     padding: 8px;
     margin: 0;
     transition: transform 0.125s ease-in-out;
+  }
+
+  .summary-tasks-down {
+    margin: 0;
+    width: 80vw;
+    max-width: 100%;
+    height: 15vh;
+    gap: 16px;
+  }
+  .summary-task-in-board,
+  .summary-task-feedback,
+  .summary-task-in-progress {
+    margin: 0;
+    padding: 8px;
+  }
+
+  .summary-task-in-board span,
+  .summary-task-feedback span,
+  .summary-task-in-progress span {
+    padding: 0;
+  }
+
 }
 
-.summary-tasks-down {
-  margin: 0;
-  width: 70vw;
-  max-width: 100%;
-  height: 15vh;
-  gap: 16px;
-}
-.summary-task-in-board, .summary-task-feedback,
-.summary-task-in-progress {
-  margin: 0;
-  padding: 8px;
+@media (max-width:380px) {
+  .summary-section {
+    gap: 0;
+    max-height: 70vh;
+  }
+  .summary-headline {
+    gap: 8px;
+    padding: 8px;
 }
 
-.summary-task-in-board span, .summary-task-feedback span,
-.summary-task-in-progress span {
-  padding: 0; 
+.summary-headline-left {
+  font-size: 36px;
+  line-height: 44px;
 }
 
 .td-num,
 .done-num,
-.urg-num,
 .board-num,
 .progress-num,
 .feed-num {
-font-size: clamp(3rem, 12px, 2rem) !important;
+  font-size: 36px !important;
 }
 
- .td-txt,
+
+.td-txt,
 .done-txt,
-.urg-txt,
 .board-txt,
 .progress-txt,
 .feed-txt {
-font-size: clamp(1rem, 12px, 1rem) !important;
+  font-size: 12px !important;
+}
+
+.summary-tasks-mid {
+  width: 80vw;
+}
+.summary-deadline {
+  font-size: 12px;
+}
+.summary-tasks-mid-right-date {
+  font-size: 14px !important;
 }
 }
-
-/* @media (max-width: 380px) {
-  .summary-section {
-    padding-top: 10px;
-    padding-left: 20px;
-    height: 60vh;
-  }
-
-  .summary-headline {
-    gap: 10px;
-  }
-
-  .summary-headline-divider {
-    display: none;
-  }
-
-  .summary-headline-divider-hor {
-    display: flex !important;
-    border-bottom: 3px;
-  }
-
-  .summary-headline-left {
-    font-size: 36px;
-    line-height: 56px;
-  }
-
-  .summary-headline-right {
-    font-size: 16px;
-    line-height: 24px;
-    font-family: "Inter";
-  }
-
-  .greet {
-    display: none;
-  }
-
-  .greet-responsive {
-    position: fixed;
-    top: 0;
-    height: 100vh;
-  }
-
-  .summary-user-greeting-resp {
-    font-size: 36px;
-    font-family: "Inter";
-    z-index: 1001;
-  }
-
-  .summary-tasks {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding-top: 10px;
-    width: 85vw;
-    height: 50vh;
-  }
-
-  .summary-to-do-left img,
-  .summary-done-left img {
-    width: 40px;
-  }
-
-  .summary-to-do,
-  .summary-done {
-    width: 140px;
-    height: 60px;
-  }
-
-  .summary-tasks-up {
-    height: 80px;
-    margin: 5px;
-    width: 300px;
-  }
-
-  .summary-tasks-mid-right-date {
-    font-size: 16px !important;
-  }
-
-  .summary-deadline {
-    font-size: 14px;
-  }
-
-  .summary-tasks-down {
-    max-width: 396px;
-    height: 90px;
-    margin: 5px;
-  }
-
-  .summary-tasks-mid-divider {
-    height: 80px;
-  }
-} */

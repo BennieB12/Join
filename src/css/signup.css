@@ -44,6 +44,11 @@ body {
   cursor: pointer;
 }
 
+.signup-arrow:hover {
+  transition: 70ms ease-in-out;
+  transform: scale(1.2);
+}
+
 .signup-input {
   padding: 12px 21px;
   width: 100%;
@@ -156,7 +161,7 @@ body {
   transition: bottom 0.5s ease;
 }
 
-.successBody {  
+.successBody {
   position: fixed;
   top: 0;
   left: 0;
@@ -226,11 +231,11 @@ body {
 }
 
 .password-toggle.show {
-  content: url('/public/img/password-show.png');
+  content: url("/public/img/password-show.png");
 }
 
 .password-toggle.hide {
-  content: url('/public/img/password-hidden.png');
+  content: url("/public/img/password-hidden.png");
 }
 
 input[type="password"]::-ms-reveal {
@@ -249,14 +254,21 @@ input[type="password"]::-webkit-password-field {
 
 @media (max-width: 768px) {
   .signup-logo {
-    top: 2%;
-    left: -1%;
+    top: 24px;
+    left: 24px;
+    height: 80px;
+    width: 64px;
   }
 
   .signup-logo img {
-    height: 78px;
-    margin-left: 36px;
-    margin-bottom: 8px;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+  .signup-headline-divider {
+    width: 30%;
+    margin: 0;
   }
 
   .signup-headline {
@@ -265,42 +277,81 @@ input[type="password"]::-webkit-password-field {
   }
 
   .signup-field {
-    max-width: 80%;
-    border-radius: 30px;
+    width: 100%;
+    max-width: 80vw;
+    height: 100%;
+    max-height: 60vh;
     padding: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  .signup-btn {
+    margin: 0;
+    width: 100%;
+    max-width: 180px;
   }
 
   form {
     max-width: 100%;
+    padding: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 70vw;
   }
 
   .signup-arrow {
-    top: 15%;
+    top: 5%;
+    left: 5%;
   }
 
   .signup-input {
-    max-width: none;
-    padding: 8px 12px;
+    width: 100%;
+    font-size: 1rem;
+    padding: 0;
   }
 
   .signup-input input {
-    max-width: 100%;
-    height: 5vh;
+    max-width: none;
+    width: 100%;
   }
 
   .signup-checkbox {
-    padding: 10px;
-  }
-
-  .signup-btn {
-    height: 40px;
-    padding: 32px;
-    margin: 0;
+    align-items: center;
+    font-family: "Inter";
+    font-size: 16px;
+    padding: 20px;
+    display: flex;
   }
 
   .submit-signup-btn {
     width: 180px;
     height: 40px;
+    padding: 4px 8px;
+}
+}
+
+@media (max-width: 480px) {
+  .signup-field {
+    max-width: 90vw;
   }
+
+  .signup-input input {
+    font-size: 12px;
+  }
+
+  .signup-input input:placeholder-shown{
+    justify-items: center;
+    font-size: 14px;
+  }
+
+  .signup-checkbox {
+    font-size: 12px;
+    width: 80vw;
+  }
+
+  .submit-signup-btn {
+    font-size: 16px;
+}
 }
