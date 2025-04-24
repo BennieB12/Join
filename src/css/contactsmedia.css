@@ -153,7 +153,7 @@
     position: relative;
     top: 0;
     left: 0;
-    height: 90vh !important;
+    height: auto;
   }
 
   .contactlist-section > * {

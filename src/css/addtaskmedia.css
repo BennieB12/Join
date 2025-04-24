@@ -295,6 +295,48 @@
   }
 }
 
+@media (max-width:768px) {
+
+  .add-Task-Container {
+    height: 80vh;
+    position: absolute;
+    top: 100px;
+    align-items: flex-start;
+  }
+
+.add-task-head {
+  display: none;
+}
+
+.add-task-create-button {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  box-shadow: 3px 6px 10px rgba(0, 0, 0, 0.3);
+}
+.add-task-create-button span {
+  display: none;
+}
+.add-task-middle-section {
+  padding: 8px;
+  margin: 0;
+}
+
+.add-task-form-left-section label {
+  padding: 8px;
+}
+
+.add-task-textarea2 {
+  max-height: 124px;
+}
+
+.add-task-title-inputfield {
+  margin: 0;
+  padding: 8px;
+}
+
+}
+
 @media (max-width: 430px) {
   .add-task-create-button {
     max-width: 170px;

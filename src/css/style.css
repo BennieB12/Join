@@ -19,12 +19,12 @@
   box-sizing: border-box;
 }
 
-body {
+/* body {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
      user-select: none; 
-}
+} */
 
 .imprint-content {
   max-width: 1016px;
@@ -212,7 +212,6 @@ header {
 .user-section img {
   width: 16px;
   cursor: pointer;
-
 }
 
 .user-icon {
@@ -256,6 +255,10 @@ header {
 }
 
 @media (max-width: 1050px) {
+  body {
+    width: 100vw;
+    height: 100vh;
+  }
   .imprint-content {
     padding-left: 27px;
   }
@@ -339,12 +342,24 @@ header {
 }
 
 @media (max-width: 768px) {
+  .user-icon {
+    margin-left: 0;
+    box-shadow: 3px 6px 10px rgba(0, 0, 0, 0.3);
+  }
 
+  header {
+    width: 100vw;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+  }
+
+  .head {
+    margin: 0;
+    padding: 16px;
+  }
 }
-
-
-
-
 
 .nav-mid a.active {
   background-color: #091931;

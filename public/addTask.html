@@ -101,16 +101,17 @@
         </section>
         <section class="add-task-finish-section">
             <p><span class="red-star">*</span>This field is required</p>
+            <div class="add-task-finish-button-container">
+                <button onclick="clearAddTask()"  class="add-task-cancel-button">
+                    <span>Clear <span>x</span></span>
+                </button>
+                <button class="add-task-create-button" id="createAdd">
+                    <span>Create Task</span>
+                    <img src="./img/check.svg" alt="">
+                </button>
+            </div>
         </section>
-        <div class="add-task-finish-button-container">
-            <button onclick="clearAddTask()"  class="add-task-cancel-button">
-                <span>Clear <span>x</span></span>
-            </button>
-            <button class="add-task-create-button" id="createAdd">
-                <span>Create Task</span>
-                <img src="./img/check.svg" alt="">
-            </button>
-        </div>
+
     </form>
     
 </body>
